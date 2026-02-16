@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21.0.9_10-jdk-jammy AS builder
+FROM eclipse-temurin:21.0.10_7-jdk-jammy AS builder
 
 ENV AWS_REGION=eu-west-2
 
@@ -13,7 +13,7 @@ RUN ./gradlew assemble -Dorg.gradle.daemon=false
 RUN apt-get update && apt-get install -y curl
 RUN curl https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem  > root.crt
 
-FROM eclipse-temurin:21.0.9_10-jdk-jammy
+FROM eclipse-temurin:21.0.10_7-jdk-jammy
 LABEL maintainer="HMPPS Digital Studio <info@digital.justice.gov.uk>"
 
 ARG BUILD_NUMBER
