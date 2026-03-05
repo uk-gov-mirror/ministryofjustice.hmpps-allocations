@@ -9,11 +9,19 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.Work
 class GetCaseByCrnTests : IntegrationTestBase() {
 
   @Test
-  fun `can get case by crn and convictionNumber`() {
+  fun `can get case by crn and convictionNumber with V1 Risk`() {
     workforceAllocationsToDelius.setApopUsers()
     workforceAllocationsToDelius.setNotExcludedUsersByCrn("J678910")
     workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedBySameTeam()
-    canGetCaseByCrnAndConvictionNumber()
+    canGetCaseByCrnAndConvictionNumberWithV1Risk()
+  }
+
+  @Test
+  fun `can get case by crn and convictionNumber with V2 Risk`() {
+    workforceAllocationsToDelius.setApopUsers()
+    workforceAllocationsToDelius.setNotExcludedUsersByCrn("J678910")
+    workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedBySameTeam()
+    canGetCaseByCrnAndConvictionNumberWithV2Risk()
   }
 
   @Test
@@ -38,7 +46,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
         "REGION2" to "Region 2",
       ),
     )
-    canGetCaseByCrnAndConvictionNumber(
+    canGetCaseByCrnAndConvictionNumberWithV1Risk(
       outOfAreaTransfer = true,
     )
   }
@@ -49,7 +57,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     workforceAllocationsToDelius.setNotExcludedUsersByCrn("J678910")
     workforceAllocationsToDelius.caseDetailsResponseWhereCurrentlyManagedByDifferentTeam()
     hmppsProbateEstate.regionsAndTeamsFailsWithInternalServerErrorResponse()
-    canGetCaseByCrnAndConvictionNumber(
+    canGetCaseByCrnAndConvictionNumberWithV1Risk(
       outOfAreaTransfer = false,
     )
   }
@@ -60,7 +68,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     workforceAllocationsToDelius.setNotExcludedUsersByCrn("J678910")
     workforceAllocationsToDelius.caseDetailsResponseIsInternalServerError()
     hmppsProbateEstate.regionsAndTeamsFailsWithInternalServerErrorResponse()
-    canGetCaseByCrnAndConvictionNumber(
+    canGetCaseByCrnAndConvictionNumberWithV1Risk(
       outOfAreaTransfer = false,
     )
   }
@@ -77,7 +85,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isForbidden
   }
 
-  private fun canGetCaseByCrnAndConvictionNumber(
+  private fun canGetCaseByCrnAndConvictionNumberWithV1Risk(
     outOfAreaTransfer: Boolean = false,
   ) {
     val crn = "J678910"
@@ -85,7 +93,7 @@ class GetCaseByCrnTests : IntegrationTestBase() {
     workforceAllocationsToDelius.userHasAccess("J678910")
     insertCases()
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRoshForCrn(crn)
-    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsForCrn(crn)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsV1ForCrn(crn)
     workforceAllocationsToDelius.riskResponse(crn)
     workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
     AssessRisksNeedsApiExtension.assessRisksNeedsApi.getAssessmentsForCrn(crn)
@@ -155,11 +163,105 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .isEqualTo("626aa1d1-71c6-4b76-92a1-bf2f9250c143")
       .jsonPath("$.preConvictionDocument.name")
       .isEqualTo("Pre Cons.pdf")
-      .jsonPath("$.roshLevel")
+      .jsonPath("$.riskVersion")
+      .isEqualTo("1")
+      .jsonPath("$.risk.roshLevel")
       .isEqualTo("VERY_HIGH")
-      .jsonPath("$.rsrLevel")
+      .jsonPath("$.risk.rsrLevel")
       .isEqualTo("MEDIUM")
-      .jsonPath("$.ogrsScore")
+      .jsonPath("$.risk.ogrsScore")
+      .isEqualTo(85)
+      .jsonPath("$.activeRiskRegistration")
+      .isEqualTo("ALT Under MAPPA Arrangements, Suicide/self-harm")
+      .jsonPath("$.outOfAreaTransfer")
+      .isEqualTo(outOfAreaTransfer)
+  }
+
+  private fun canGetCaseByCrnAndConvictionNumberWithV2Risk(
+    outOfAreaTransfer: Boolean = false,
+  ) {
+    val crn = "J678910"
+    val convictionNumber = 1
+    workforceAllocationsToDelius.userHasAccess("J678910")
+    insertCases()
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRoshForCrn(crn)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getRiskPredictorsV2ForCrn(crn)
+    workforceAllocationsToDelius.riskResponse(crn)
+    workforceAllocationsToDelius.caseViewResponse(crn, convictionNumber)
+    AssessRisksNeedsApiExtension.assessRisksNeedsApi.getAssessmentsForCrn(crn)
+    workforceAllocationsToDelius.userHasAccess("J678910")
+    webTestClient.get()
+      .uri("/cases/unallocated/$crn/convictions/$convictionNumber")
+      .headers { it.authToken(roles = listOf("ROLE_MANAGE_A_WORKFORCE_ALLOCATE")) }
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("$.sentenceDate")
+      .isEqualTo("2023-01-04")
+      .jsonPath("$.name")
+      .isEqualTo("Dylan Adam Armstrong")
+      .jsonPath("$.crn")
+      .isEqualTo("J678910")
+      .jsonPath("$.tier")
+      .isEqualTo("C1")
+      .jsonPath("$.gender")
+      .isEqualTo("Male")
+      .jsonPath("$.dateOfBirth")
+      .isEqualTo("2001-11-17")
+      .jsonPath("$.age")
+      .isEqualTo(21)
+      .jsonPath("$.expectedSentenceEndDate")
+      .isEqualTo("2024-01-03")
+      .jsonPath("$.sentenceDescription")
+      .isEqualTo("Adult Custody < 12m")
+      .jsonPath("$.offences[0].mainOffence")
+      .isEqualTo(true)
+      .jsonPath("$.offences[0].mainCategory")
+      .isEqualTo("Abstracting electricity")
+      .jsonPath("$.offences[0].subCategory")
+      .isEqualTo("Abstracting electricity")
+      .jsonPath("$.requirements[0].mainCategory")
+      .isEqualTo("Unpaid Work")
+      .jsonPath("$.requirements[0].subCategory")
+      .isEqualTo("Regular")
+      .jsonPath("$.requirements[0].length")
+      .isEqualTo("100 Hours")
+      .jsonPath("$.pncNumber")
+      .isEqualTo("9999/1234567A")
+      .jsonPath("$.courtReport.description")
+      .isEqualTo("Pre-Sentence Report - Fast")
+      .jsonPath("$.courtReport.completedDate")
+      .isEqualTo("2021-12-07")
+      .jsonPath("$.courtReport.documentId")
+      .isEqualTo("6c50048a-c647-4598-8fae-0b84c69ef31a")
+      .jsonPath("$.courtReport.name")
+      .isEqualTo("doc.pdf")
+      .jsonPath("$.cpsPack.completedDate")
+      .isEqualTo("2021-10-16")
+      .jsonPath("$.cpsPack.documentId")
+      .isEqualTo("efb7a4e8-3f4a-449c-bf6f-b1fc8def3410")
+      .jsonPath("$.cpsPack.name")
+      .isEqualTo("cps.pdf")
+      .jsonPath("$.assessment.lastAssessedOn")
+      .isEqualTo("2014-03-28")
+      .jsonPath("$.assessment.type")
+      .isEqualTo("LAYER_3")
+      .jsonPath("$.convictionNumber")
+      .isEqualTo(convictionNumber)
+      .jsonPath("$.preConvictionDocument.completedDate")
+      .doesNotExist()
+      .jsonPath("$.preConvictionDocument.documentId")
+      .isEqualTo("626aa1d1-71c6-4b76-92a1-bf2f9250c143")
+      .jsonPath("$.preConvictionDocument.name")
+      .isEqualTo("Pre Cons.pdf")
+      .jsonPath("$.riskVersion")
+      .isEqualTo("2")
+      .jsonPath("$.risk.roshLevel")
+      .isEqualTo("VERY_HIGH")
+      .jsonPath("$.risk.combinedSeriousReoffendingPredictor.band")
+      .isEqualTo("LOW")
+      .jsonPath("$.risk.allReoffendingPredictor.score")
       .isEqualTo(85)
       .jsonPath("$.activeRiskRegistration")
       .isEqualTo("ALT Under MAPPA Arrangements, Suicide/self-harm")
@@ -363,11 +465,11 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .expectStatus()
       .isOk
       .expectBody()
-      .jsonPath("$.roshLevel")
+      .jsonPath("$.risk.roshLevel")
       .isEqualTo("NOT_FOUND")
-      .jsonPath("$.rsrLevel")
+      .jsonPath("$.risk.combinedSeriousReoffendingPredictor.band")
       .isEqualTo("NOT_FOUND")
-      .jsonPath("$.ogrsScore")
+      .jsonPath("$.risk.allReoffendingPredictor")
       .isEmpty
       .jsonPath("$.activeRiskRegistration")
       .isEmpty
@@ -397,11 +499,11 @@ class GetCaseByCrnTests : IntegrationTestBase() {
       .expectStatus()
       .isOk
       .expectBody()
-      .jsonPath("$.roshLevel")
+      .jsonPath("$.risk.roshLevel")
       .isEqualTo("UNAVAILABLE")
-      .jsonPath("$.rsrLevel")
+      .jsonPath("$.risk.combinedSeriousReoffendingPredictor.band")
       .isEqualTo("UNAVAILABLE")
-      .jsonPath("$.ogrsScore")
+      .jsonPath("$.risk.allReoffendingPredictor")
       .isEmpty
       .jsonPath("$.activeRiskRegistration")
       .isEmpty

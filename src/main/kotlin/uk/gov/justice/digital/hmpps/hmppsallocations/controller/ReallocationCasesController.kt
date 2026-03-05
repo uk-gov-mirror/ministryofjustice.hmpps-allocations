@@ -59,7 +59,7 @@ class ReallocationCasesController(private val getAllocatedCaseService: GetAlloca
   @GetMapping("/cases/allocated/{crn}/risks")
   suspend fun getCaseRisks(
     @PathVariable(required = true) crn: String,
-  ): UnallocatedCaseRisks = getAllocatedCaseService.getCaseRisks(crn)
+  ): UnallocatedCaseRisks<Any> = getAllocatedCaseService.getCaseRisks(crn)
     ?: throw EntityNotFoundException("Case risks Not Found for $crn")
 
   @Operation(summary = "Retrieve assessment date by crn")

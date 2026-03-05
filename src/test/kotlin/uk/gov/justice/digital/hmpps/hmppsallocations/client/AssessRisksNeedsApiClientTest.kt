@@ -104,20 +104,39 @@ class AssessRisksNeedsApiClientTest {
   }
 
   @Test
-  fun `test getRiskPredictors successful response`() = runBlocking {
+  fun `test getRiskPredictors V1 successful response`() = runBlocking {
     val exchangeFunction = ExchangeFunction { request ->
       Mono.just(
         ClientResponse.create(HttpStatus.OK)
           .header("Content-Type", "application/json")
-          .body("""[{"rsrPercentageScore":0.5,"rsrScoreLevel":"HIGH","completedDate":"2023-01-01T12:00:00"}]""")
+          .body("""[{"completedDate": "2023-01-01T12:00:00","source": "OASYS","status": "COMPLETE","outputVersion": "1","output": {"riskOfSeriousRecidivismScore": {"percentageScore": 0.5,"staticOrDynamic": "STATIC","source": "OASYS","algorithmVersion": "5", "scoreLevel": "HIGH"}}}]""")
           .build(),
       )
     }
     val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
     val result = AssessRisksNeedsApiClient(webClient).getRiskPredictors("X123456").toList().get(0)
     assert(result.completedDate == LocalDateTime.parse("2023-01-01T12:00:00"))
-    assert(result.rsrScoreLevel == "HIGH")
-    assert(result.rsrPercentageScore == BigDecimal.valueOf(0.5))
+    assert(result.getRSRScoreLevel() == "HIGH")
+    assert(result.getRSRPercentageScore() == BigDecimal.valueOf(0.5))
+  }
+
+  @Test
+  fun `test getRiskPredictors V2 successful response`() = runBlocking {
+    val exchangeFunction = ExchangeFunction { request ->
+      Mono.just(
+        ClientResponse.create(HttpStatus.OK)
+          .header("Content-Type", "application/json")
+          .body(
+            """[{"completedDate": "2025-10-23T03:02:59","source": "OASYS","status": "COMPLETE","outputVersion": "2","output": {"combinedSeriousReoffendingPredictor": {"algorithmVersion": "6","staticOrDynamic": "STATIC","score": 0.5,"band": "HIGH"}}}]""",
+          )
+          .build(),
+      )
+    }
+    val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
+    val result = AssessRisksNeedsApiClient(webClient).getRiskPredictors("X123456").toList().get(0)
+    assert(result.completedDate == LocalDateTime.parse("2025-10-23T03:02:59"))
+    assert(result.getRSRScoreLevel() == "HIGH")
+    assert(result.getRSRPercentageScore() == BigDecimal.valueOf(0.5))
   }
 
   @Test
@@ -137,7 +156,7 @@ class AssessRisksNeedsApiClientTest {
     val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
     val result = AssessRisksNeedsApiClient(webClient).getRiskPredictors("X123456").toList()
     assert(result.get(0).completedDate == null)
-    assert(result.get(0).rsrScoreLevel == "UNAVAILABLE")
-    assert(result.get(0).rsrPercentageScore == BigDecimal(Int.MIN_VALUE))
+    assert(result.get(0).getRSRScoreLevel() == "UNAVAILABLE")
+    assert(result.get(0).getRSRPercentageScore() == BigDecimal(Int.MIN_VALUE))
   }
 }

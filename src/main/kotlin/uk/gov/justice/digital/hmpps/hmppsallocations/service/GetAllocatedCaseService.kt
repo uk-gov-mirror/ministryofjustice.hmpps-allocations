@@ -11,8 +11,12 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocations
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.DeliusAllocatedCaseView
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AllocatedCaseDetails
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.AssessmentDate
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorV1
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskPredictorV2
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseConvictions
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisks
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisksV1
+import uk.gov.justice.digital.hmpps.hmppsallocations.domain.UnallocatedCaseRisksV2
 import java.time.LocalDateTime
 
 @Service
@@ -50,18 +54,19 @@ class GetAllocatedCaseService(
     }
   }
 
-  suspend fun getCaseRisks(crn: String): UnallocatedCaseRisks? {
+  suspend fun getCaseRisks(crn: String): UnallocatedCaseRisks<Any>? {
     val tier = tierApiClient.getTierByCrn(crn)
     return workforceAllocationsToDeliusApiClient.getCrnDetails(crn)?.let { caseDetails ->
-      return UnallocatedCaseRisks.from(
-        workforceAllocationsToDeliusApiClient.getDeliusRisk(crn),
-        caseDetails,
-        assessRisksNeedsApiClient.getRosh(crn),
-        assessRisksNeedsApiClient.getRiskPredictors(crn)
-          .filter { it.rsrScoreLevel != null && it.rsrPercentageScore != null }
-          .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN },
-        tier!!,
-      )
+      val riskPredictor = assessRisksNeedsApiClient.getRiskPredictors(crn)
+        .filter { (it.getRSRScoreLevel() != null && it.getRSRPercentageScore() != null) || (it.getOGRSScoreLevel() != null && it.getOGRSPercentageScore() != null) }
+        .toList().maxByOrNull { it.completedDate ?: LocalDateTime.MIN }
+      val deliusRisk = workforceAllocationsToDeliusApiClient.getDeliusRisk(crn)
+      val rosh = assessRisksNeedsApiClient.getRosh(crn)
+      return if (riskPredictor?.outputVersion == "2") {
+        UnallocatedCaseRisksV2.from(deliusRisk, caseDetails, rosh, riskPredictor as RiskPredictorV2?, tier!!)
+      } else {
+        UnallocatedCaseRisksV1.from(deliusRisk, caseDetails, rosh, riskPredictor as RiskPredictorV1?, tier!!)
+      }
     }
   }
 

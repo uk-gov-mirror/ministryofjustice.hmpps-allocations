@@ -106,7 +106,7 @@ class UnallocatedCasesController(
   suspend fun getUnallocatedCaseRisks(
     @PathVariable(required = true) crn: String,
     @PathVariable(required = true) convictionNumber: Long,
-  ): UnallocatedCaseRisks = getUnallocatedCaseService.getCaseRisks(crn, convictionNumber)
+  ): UnallocatedCaseRisks<Any> = getUnallocatedCaseService.getCaseRisks(crn, convictionNumber)
     ?: throw EntityNotFoundException("Unallocated case risks Not Found for $crn")
 
   @Operation(summary = "Retrieve unallocated case confirm instructions by crn")

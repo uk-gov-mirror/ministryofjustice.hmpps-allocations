@@ -36,10 +36,6 @@ fun deliusRiskResponse() = """
         "description": "Child Protection Flag"
         }
     }
-  ],
-  "ogrs": {
-    "lastUpdatedDate": "2018-11-17",
-    "score": 85
-  }
+  ]
 }
 """.trimIndent()
