@@ -26,6 +26,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.Prob
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.TierApiExtension
 import uk.gov.justice.digital.hmpps.hmppsallocations.integration.mockserver.WorkforceAllocationsToDeliusApiExtension
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.entity.UnallocatedCaseEntity
+import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.SavedEmailsRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.CalculationEventListener.CalculationEventData
 import uk.gov.justice.digital.hmpps.hmppsallocations.listener.CalculationEventListener.PersonReference
@@ -195,6 +196,9 @@ abstract class IntegrationTestBase {
 
   @Autowired
   protected lateinit var repository: UnallocatedCasesRepository
+
+  @Autowired
+  protected lateinit var savedEmailRepository: SavedEmailsRepository
 
   @Autowired
   protected lateinit var jwtAuthHelper: JwtAuthHelper
