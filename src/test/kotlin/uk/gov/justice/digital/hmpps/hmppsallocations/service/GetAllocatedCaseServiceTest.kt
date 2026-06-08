@@ -81,7 +81,7 @@ class GetAllocatedCaseServiceTest {
             "12 months",
           ),
           listOf(AllocatedEventOffences("Burglary", "Theft", true)),
-          listOf(AllocatedEventRequirement("Curfew", "Must comply with curfew", "6 months")),
+          listOf(AllocatedEventRequirement("Curfew", null, "6 months")),
         ),
       ),
     )
