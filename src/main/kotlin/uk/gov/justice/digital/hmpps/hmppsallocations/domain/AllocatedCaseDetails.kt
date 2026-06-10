@@ -65,7 +65,7 @@ data class AllocatedActiveEvent @JsonCreator constructor(
 
 data class AllocatedEventRequirement @JsonCreator constructor(
   val mainCategory: String,
-  val subCategory: String,
+  val subCategory: String?,
   val length: String,
 )
 
