@@ -38,7 +38,7 @@ kind: CronJob
 metadata:
   name: hmpps-allocations-refresh-cronjob
 spec:
-  schedule: "0 23 29 2 6"
+  schedule: "0 23 7 7 *"
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
