@@ -27,11 +27,6 @@ configurations.matching { it.name == "detekt" }.all {
   }
 }
 
-dependencyCheck {
-  suppressionFiles.add("suppressions.xml")
-  nvd.datafeedUrl = "file:///opt/vulnz/cache"
-}
-
 allOpen {
   annotations("jakarta.persistence.Entity")
 }
