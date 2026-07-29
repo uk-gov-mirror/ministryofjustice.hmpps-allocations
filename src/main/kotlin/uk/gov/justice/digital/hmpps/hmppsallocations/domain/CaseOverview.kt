@@ -9,8 +9,9 @@ data class CaseOverview @JsonCreator constructor(
   val name: String,
   @Schema(description = "CRN", example = "J111111")
   val crn: String,
-  @Schema(description = "Latest tier of case", example = "D2")
+  @Schema(description = "Latest tier of case", example = "D")
   val tier: String,
+  val provisionalTier: Boolean,
   @Schema(description = "Conviction Number")
   val convictionNumber: Int,
 ) {
@@ -19,6 +20,7 @@ data class CaseOverview @JsonCreator constructor(
       case.name,
       case.crn,
       case.tier,
+      case.provisionalTier,
       case.convictionNumber,
     )
   }

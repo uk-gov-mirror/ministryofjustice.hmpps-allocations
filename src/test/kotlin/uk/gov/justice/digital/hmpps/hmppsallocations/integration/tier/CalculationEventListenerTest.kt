@@ -17,9 +17,9 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
   fun `change tier after event calculation is consumed`() {
     val crn = "X123456"
     hmppsTier.tierCalculationResponse(crn)
-    writeUnallocatedCaseToDatabase(crn, "D0", 1)
+    writeUnallocatedCaseToDatabase(crn, "D", 1)
     publishTierCalculationCompleteMessage(crn)
-    checkTierHasBeenUpdated(crn, "B3", 1)
+    checkTierHasBeenUpdated(crn, "B", 1)
   }
 
   @Test
@@ -36,11 +36,11 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
   fun `updates all occurrences of crn after event calculation is consumed`() {
     val crn = "X123456"
     hmppsTier.tierCalculationResponse(crn)
-    writeUnallocatedCaseToDatabase(crn, "D0", 1)
-    writeUnallocatedCaseToDatabase(crn, "D0", 2)
+    writeUnallocatedCaseToDatabase(crn, "D", 1)
+    writeUnallocatedCaseToDatabase(crn, "D", 2)
     publishTierCalculationCompleteMessage(crn)
-    checkTierHasBeenUpdated(crn, "B3", 1)
-    checkTierHasBeenUpdated(crn, "B3", 2)
+    checkTierHasBeenUpdated(crn, "B", 1)
+    checkTierHasBeenUpdated(crn, "B", 2)
   }
 
   private fun writeUnallocatedCaseToDatabase(crn: String, tier: String, convictionNumber: Int) {
@@ -48,6 +48,7 @@ internal class CalculationEventListenerTest : IntegrationTestBase() {
       UnallocatedCaseEntity(
         crn = crn,
         tier = tier,
+        provisionalTier = false,
         name = "foo",
         providerCode = "",
         teamCode = "",

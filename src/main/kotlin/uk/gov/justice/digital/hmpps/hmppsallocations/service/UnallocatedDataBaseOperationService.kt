@@ -29,13 +29,14 @@ class UnallocatedDataBaseOperationService(
     name: String,
     crn: String,
     tier: String,
+    provisionalTier: Boolean,
   ) {
     activeEvents
       .filter { activeEvent -> storedUnallocatedEvents.none { entry -> entry.convictionNumber == activeEvent.key } }
       .map { it.value }
       .forEach { createEvent ->
         logger.debug("Saving new event with CRN $crn, teamCode ${createEvent.teamCode}, convictionNumber ${createEvent.eventNumber.toInt()}")
-        repository.upsertUnallocatedCase(name, crn, tier, createEvent.teamCode, createEvent.providerCode, Integer.parseInt(createEvent.eventNumber))
+        repository.upsertUnallocatedCase(name, crn, tier, provisionalTier, createEvent.teamCode, createEvent.providerCode, Integer.parseInt(createEvent.eventNumber))
         telemetryService.trackAllocationDemandRaised(crn, createEvent.teamCode, createEvent.providerCode)
       }
   }
@@ -69,13 +70,14 @@ class UnallocatedDataBaseOperationService(
     storedUnallocatedEvents: List<UnallocatedCaseEntity>,
     name: String,
     tier: String,
+    provisionalTier: Boolean,
   ) {
     storedUnallocatedEvents
       .filter { activeEvents.containsKey(it.convictionNumber) }
       .forEach { unallocatedCaseEntity ->
         val activeEvent = activeEvents[unallocatedCaseEntity.convictionNumber]!!
         logger.debug("Updating existing event for crn ${unallocatedCaseEntity.crn}, convictionNumber ${unallocatedCaseEntity.convictionNumber}, teamCode ${activeEvent.teamCode}")
-        repository.upsertUnallocatedCase(name, unallocatedCaseEntity.crn, tier, activeEvent.teamCode, activeEvent.providerCode, unallocatedCaseEntity.convictionNumber)
+        repository.upsertUnallocatedCase(name, unallocatedCaseEntity.crn, tier, provisionalTier, activeEvent.teamCode, activeEvent.providerCode, unallocatedCaseEntity.convictionNumber)
       }
   }
 

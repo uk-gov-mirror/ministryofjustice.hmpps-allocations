@@ -27,7 +27,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       UnallocatedCaseEntity(
         crn = crn,
         name = "Tester TestSurname",
-        tier = "B3",
+        tier = "B",
+        provisionalTier = false,
         providerCode = "ORIGINALPROVIDER",
         teamCode = "ORIGINALTEAM",
         convictionNumber = 1,
@@ -46,7 +47,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
     val case = repository.findAll().first()
 
     assertThat(case.name).isEqualTo("Tester TestSurname")
-    assertThat(case.tier).isEqualTo("B3")
+    assertThat(case.tier).isEqualTo("B")
+    assertThat(case.provisionalTier).isEqualTo(false)
     assertThat(case.teamCode).isEqualTo("TM1")
     assertThat(case.providerCode).isEqualTo("PAC1")
   }
@@ -59,7 +61,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       UnallocatedCaseEntity(
         crn = crn,
         name = "Tester TestSurname",
-        tier = "B3",
+        tier = "B",
+        provisionalTier = false,
         providerCode = "PC1",
         teamCode = "TC1",
         convictionNumber = 1,
@@ -105,7 +108,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       UnallocatedCaseEntity(
         crn = crn,
         name = "Tester TestSurname",
-        tier = "B3",
+        tier = "B",
+        provisionalTier = false,
         providerCode = "",
         teamCode = "",
         convictionNumber = 1,
@@ -131,7 +135,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       UnallocatedCaseEntity(
         crn = crn,
         name = "Tester TestSurname",
-        tier = "B3",
+        tier = "B",
+        provisionalTier = false,
         providerCode = "",
         teamCode = "",
         convictionNumber = 1,
@@ -157,7 +162,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       UnallocatedCaseEntity(
         crn = crn,
         name = "Tester TestSurname",
-        tier = "B3",
+        tier = "B",
+        provisionalTier = false,
         providerCode = "",
         teamCode = "",
         convictionNumber = 1,
@@ -182,7 +188,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
       UnallocatedCaseEntity(
         crn = crn,
         name = "Tester TestSurname",
-        tier = "B3",
+        tier = "B",
+        provisionalTier = false,
         providerCode = "",
         teamCode = "",
         convictionNumber = 1,
@@ -194,7 +201,8 @@ class UpdateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
         UnallocatedCaseEntity(
           crn = crn,
           name = "Tester TestSurname",
-          tier = "B3",
+          tier = "B",
+          provisionalTier = false,
           providerCode = "",
           teamCode = "",
           convictionNumber = 1,

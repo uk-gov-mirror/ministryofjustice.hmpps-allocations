@@ -15,8 +15,9 @@ data class UnallocatedCaseConvictions @JsonCreator constructor(
   val name: String,
   @Schema(description = "CRN", example = "J111111")
   val crn: String,
-  @Schema(description = "Latest tier of case", example = "D2")
+  @Schema(description = "Latest tier of case", example = "D")
   val tier: String,
+  val provisionalTier: Boolean,
   val active: List<UnallocatedCaseConviction>,
   val previous: List<UnallocatedCaseConviction>,
   val convictionNumber: Int,
@@ -29,6 +30,7 @@ data class UnallocatedCaseConvictions @JsonCreator constructor(
       probationRecord.name.getCombinedName(),
       case.crn,
       case.tier,
+      case.provisionalTier,
       probationRecord.activeEvents.map { UnallocatedCaseConviction.from(it) },
       probationRecord.inactiveEvents.map { UnallocatedCaseConviction.from(it) },
       case.convictionNumber,
@@ -40,10 +42,12 @@ data class UnallocatedCaseConvictions @JsonCreator constructor(
       crn: String,
       convictionNumber: Int,
       tier: String,
+      provisionalTier: Boolean,
     ): UnallocatedCaseConvictions = UnallocatedCaseConvictions(
       probationRecord.name.getCombinedName(),
       crn,
       tier,
+      provisionalTier,
       probationRecord.activeEvents.map { UnallocatedCaseConviction.from(it) },
       probationRecord.inactiveEvents.map { UnallocatedCaseConviction.from(it) },
       convictionNumber,

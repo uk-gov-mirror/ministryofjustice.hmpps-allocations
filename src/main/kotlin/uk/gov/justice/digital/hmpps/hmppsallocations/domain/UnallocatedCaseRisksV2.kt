@@ -13,8 +13,9 @@ data class UnallocatedCaseRisksV2 @JsonCreator constructor(
   override val name: String,
   @Schema(description = "CRN", example = "J111111")
   override val crn: String,
-  @Schema(description = "Latest tier of case", example = "D2")
+  @Schema(description = "Latest tier of case", example = "D")
   override val tier: String,
+  override val provisionalTier: Boolean,
   override val completedDate: LocalDateTime?,
   override val riskVersion: String?,
   override val activeRegistrations: List<UnallocatedCaseRegistration>,
@@ -37,6 +38,7 @@ data class UnallocatedCaseRisksV2 @JsonCreator constructor(
       case.name,
       case.crn,
       case.tier,
+      case.provisionalTier,
       riskPredictor?.completedDate,
       riskPredictor?.outputVersion,
       deliusRisk.activeRegistrations.map { UnallocatedCaseRegistration.from(it) },
@@ -52,10 +54,12 @@ data class UnallocatedCaseRisksV2 @JsonCreator constructor(
       rosh: RoshSummary?,
       riskPredictor: RiskPredictorV2?,
       tier: String,
+      provisionalTier: Boolean,
     ): UnallocatedCaseRisksV2 = UnallocatedCaseRisksV2(
       case.name.getCombinedName(),
       case.crn,
       tier,
+      provisionalTier,
       riskPredictor?.completedDate,
       "2",
       deliusRisk.activeRegistrations.map { UnallocatedCaseRegistration.from(it) },

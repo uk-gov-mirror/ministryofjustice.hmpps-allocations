@@ -128,7 +128,8 @@ class CreateUnallocatedCaseOffenderEventListenerTests : IntegrationTestBase() {
 
   private fun verifyCase(case: UnallocatedCaseEntity) {
     assertThat(case.name).isEqualTo("Tester TestSurname")
-    assertThat(case.tier).isEqualTo("B3")
+    assertThat(case.tier).isEqualTo("B")
+    assertThat(case.provisionalTier).isEqualTo(false)
     assertThat(case.teamCode).isEqualTo("TM1")
     assertThat(case.providerCode).isEqualTo("PAC1")
     assertThat(case.convictionNumber).isEqualTo(1)

@@ -11,8 +11,9 @@ data class UnallocatedCaseConfirmInstructions @JsonCreator constructor(
   val name: Name,
   @Schema(description = "CRN", example = "J111111")
   val crn: String,
-  @Schema(description = "Latest tier of case", example = "D2")
+  @Schema(description = "Latest tier of case", example = "D")
   val tier: String,
+  val provisionalTier: Boolean,
   val convictionNumber: Int,
   val staff: StaffMember,
 ) {
@@ -25,6 +26,7 @@ data class UnallocatedCaseConfirmInstructions @JsonCreator constructor(
       personOnProbationStaffDetailsResponse.name,
       case.crn,
       case.tier,
+      case.provisionalTier,
       case.convictionNumber,
       personOnProbationStaffDetailsResponse.staff,
     )

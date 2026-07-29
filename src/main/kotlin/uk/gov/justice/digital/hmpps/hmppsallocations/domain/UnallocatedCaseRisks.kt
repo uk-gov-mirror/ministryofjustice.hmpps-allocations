@@ -7,6 +7,7 @@ interface UnallocatedCaseRisks<out T> {
   val name: String
   val crn: String
   val tier: String
+  val provisionalTier: Boolean
   val completedDate: LocalDateTime?
   val riskVersion: String?
   val activeRegistrations: List<UnallocatedCaseRegistration>

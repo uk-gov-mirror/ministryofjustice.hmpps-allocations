@@ -27,6 +27,7 @@ import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.ProbationRecordS
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.Registrations
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.SentenceOffence
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.SentencedEvent
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.TierWithStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.Assessment
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.GroupReconvictionScore
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.RiskOfSeriousRecidivismScore
@@ -92,7 +93,7 @@ class GetAllocatedCaseServiceTest {
       isRedacted = false,
     )
 
-    val tier = "C2"
+    val tier = TierWithStatus("C", false)
 
     // Arrange
     coEvery { workforceAllocationsToDeliusApiClient.getAllocatedDeliusCaseView(any()) } returns Mono.just(deliusCaseView)
@@ -103,7 +104,7 @@ class GetAllocatedCaseServiceTest {
     val result = service.getCase("userName", crn)
 
     // Assert
-    assert(result!!.tier == tier)
+    assert(result!!.tier == tier.tierScore)
     assert(result.crn == crn)
     assert(result.activeEvents.size == 1)
     assert(result.activeEvents.first().sentence!!.length == "12 months")
@@ -174,7 +175,7 @@ class GetAllocatedCaseServiceTest {
       isRedacted = false,
     )
 
-    val tier = "C2"
+    val tier = TierWithStatus("C", false)
 
     // Arrange
     coEvery { workforceAllocationsToDeliusApiClient.getAllocatedDeliusCaseView(any()) } returns Mono.just(deliusCaseView)
@@ -185,7 +186,7 @@ class GetAllocatedCaseServiceTest {
     val result = service.getCase("userName", crn)
 
     // Assert
-    assert(result!!.tier == tier)
+    assert(result!!.tier == tier.tierScore)
     assert(result.crn == crn)
     assert(result.activeEvents.size == 1)
     assert(result.activeEvents.first().sentence!!.length == "12 months")
@@ -221,7 +222,7 @@ class GetAllocatedCaseServiceTest {
       ),
     )
 
-    val tier = "C2"
+    val tier = TierWithStatus("C", false)
 
     val sentenceOffence = SentenceOffence("Thievery", true)
     val sentenceOffence2 = SentenceOffence("Vagrancy", false)
@@ -251,7 +252,7 @@ class GetAllocatedCaseServiceTest {
     // Assert
     assert(result!!.crn == crn)
     assert(result!!.previous.size == 2)
-    assert(result!!.tier == tier)
+    assert(result!!.tier == tier.tierScore)
     assert(result!!.active.size == 1)
     assert(result!!.convictionNumber.toLong() == convictionNumber)
   }
@@ -278,7 +279,7 @@ class GetAllocatedCaseServiceTest {
       true,
     )
 
-    val tier = "C2"
+    val tier = TierWithStatus("C", false)
 
     val deliusRisk = DeliusRisk(
       Name(forename = "Dylan", middleName = null, surname = "Armstrong"),
@@ -360,7 +361,7 @@ class GetAllocatedCaseServiceTest {
     // Assert
     assert(result!!.crn == crn)
     assert(result!!.name == "Dylan Armstrong")
-    assert(result!!.tier == tier)
+    assert(result!!.tier == tier.tierScore)
     assert(result!!.activeRegistrations.size == 2)
     assert(result!!.inactiveRegistrations.size == 1)
     assert(result!!.getOGRSScore() == BigDecimal.valueOf(85))

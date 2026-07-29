@@ -70,7 +70,9 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].crn")
       .isEqualTo("J678910")
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].tier")
-      .isEqualTo("C1")
+      .isEqualTo("C")
+      .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].provisionalTier")
+      .isEqualTo(false)
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].status")
       .isEqualTo("Currently managed")
       .jsonPath("$.[?(@.convictionNumber == 1 && @.crn == 'J678910')].offenderManager.forenames")
@@ -461,7 +463,8 @@ class GetUnallocatedCasesByTeamTests : IntegrationTestBase() {
         id = null,
         name = "Donald Duck",
         crn = c2cCaseCrn,
-        tier = "A1",
+        tier = "A",
+        provisionalTier = false,
         providerCode = "",
         teamCode = "TEAM1",
         convictionNumber = 2,

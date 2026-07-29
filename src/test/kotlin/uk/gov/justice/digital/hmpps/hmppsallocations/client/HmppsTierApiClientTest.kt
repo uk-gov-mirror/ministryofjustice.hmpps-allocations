@@ -8,6 +8,7 @@ import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.ExchangeFunction
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.TierWithStatus
 
 class HmppsTierApiClientTest {
 
@@ -32,7 +33,7 @@ class HmppsTierApiClientTest {
     val exception = assertThrows<RuntimeException> {
       HmppsTierApiClient(webClient).getTierByCrn("X123456")
     }
-    assert(exception is MissingTierException)
+    assert(exception is TierNotFoundException)
   }
 
   @Test
@@ -41,12 +42,12 @@ class HmppsTierApiClientTest {
       Mono.just(
         ClientResponse.create(HttpStatus.OK)
           .header("Content-Type", "application/json")
-          .body("""{"tierScore":"A1"}""")
+          .body("""{"tierScore":"A","provisional":false}""")
           .build(),
       )
     }
     val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
     val result = HmppsTierApiClient(webClient).getTierByCrn("X123456")
-    assert(result == "A1")
+    assert(result == TierWithStatus("A", false))
   }
 }

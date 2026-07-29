@@ -29,6 +29,9 @@ data class UnallocatedCaseEntity(
   var tier: String,
 
   @Column
+  var provisionalTier: Boolean,
+
+  @Column
   var teamCode: String,
 
   @Column

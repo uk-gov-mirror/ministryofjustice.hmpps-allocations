@@ -1,0 +1,1 @@
+ALTER TABLE unallocated_cases ADD COLUMN provisional_tier BOOLEAN NOT NULL DEFAULT FALSE;

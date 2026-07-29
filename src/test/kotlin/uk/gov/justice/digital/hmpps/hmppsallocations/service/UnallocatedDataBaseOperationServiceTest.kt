@@ -20,21 +20,25 @@ import java.time.ZonedDateTime
 
 class UnallocatedDataBaseOperationServiceTest {
   val storedUnallocatedEvents = listOf(
-    UnallocatedCaseEntity(1L, "Bob Jones", "J778881", "C2", "N54ERT", "PC001", ZonedDateTime.now(), 1),
-    UnallocatedCaseEntity(2L, "Bob Jones", "J778881", "C2", "N54ERT", "PC001", ZonedDateTime.now(), 2),
+    UnallocatedCaseEntity(1L, "Bob Jones", "J778881", "C", false, "N54ERT", "PC001", ZonedDateTime.now(), 1),
+    UnallocatedCaseEntity(2L, "Bob Jones", "J778881", "C", false, "N54ERT", "PC001", ZonedDateTime.now(), 2),
   )
   val storedUnallocatedEventsSameConNumber = listOf(
-    UnallocatedCaseEntity(1L, "Bob Jones", "J778881", "C2", "N54ERT", "PC001", ZonedDateTime.now(), 1),
-    UnallocatedCaseEntity(2L, "Bob Jones", "J778881", "C2", "N54ERT", "PC001", ZonedDateTime.now(), 1),
+    UnallocatedCaseEntity(1L, "Bob Jones", "J778881", "C", false, "N54ERT", "PC001", ZonedDateTime.now(), 1),
+    UnallocatedCaseEntity(2L, "Bob Jones", "J778881", "C", false, "N54ERT", "PC001", ZonedDateTime.now(), 1),
   )
   val storedUnallocatedEventsForSave = listOf(
-    UnallocatedCaseEntity(1L, "Bob Jones", "J778881", "C2", "N54ERT", "PC001", ZonedDateTime.now(), 3),
-    UnallocatedCaseEntity(2L, "Bob Jones", "J778881", "C2", "N54ERT", "PC001", ZonedDateTime.now(), 4),
-    UnallocatedCaseEntity(3L, "Bob Jones", "J778881", "C2", "N54ERT", "PC001", ZonedDateTime.now(), 5),
+    UnallocatedCaseEntity(1L, "Bob Jones", "J778881", "C", false, "N54ERT", "PC001", ZonedDateTime.now(), 3),
+    UnallocatedCaseEntity(2L, "Bob Jones", "J778881", "C", false, "N54ERT", "PC001", ZonedDateTime.now(), 4),
+    UnallocatedCaseEntity(3L, "Bob Jones", "J778881", "C", true, "N54ERT", "PC001", ZonedDateTime.now(), 5),
   )
-  val storedUnallocatedEventsForUpdate = listOf(
-    UnallocatedCaseEntity(1L, "Bob Jones", "J778881", "C1", "N54ERT", "PC001", ZonedDateTime.now(), 1),
-    UnallocatedCaseEntity(2L, "Bob Jones", "J778881", "C2", "N54ERT", "PC001", ZonedDateTime.now(), 2),
+  val storedUnallocatedEventsForTierUpdate = listOf(
+    UnallocatedCaseEntity(1L, "Bob Jones", "J778881", "B", false, "N54ERT", "PC001", ZonedDateTime.now(), 1),
+    UnallocatedCaseEntity(2L, "Bob Jones", "J778881", "C", false, "N54ERT", "PC001", ZonedDateTime.now(), 2),
+  )
+  val storedUnallocatedEventsForProvisionalUpdate = listOf(
+    UnallocatedCaseEntity(1L, "Bob Jones", "J778881", "C", true, "N54ERT", "PC001", ZonedDateTime.now(), 1),
+    UnallocatedCaseEntity(2L, "Bob Jones", "J778881", "C", false, "N54ERT", "PC001", ZonedDateTime.now(), 2),
   )
   val activeEvents = hashMapOf(Pair(1, ActiveEvent("1", "N54ERT", "PC001")))
 
@@ -75,25 +79,33 @@ class UnallocatedDataBaseOperationServiceTest {
   @Test
   fun `will save a new event`() = runTest {
     val unallocatedCaseEntity = storedUnallocatedEvents.get(1)
-    coEvery { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any()) } just runs
-    cut.saveNewEvents(activeEvents, storedUnallocatedEventsForSave, unallocatedCaseEntity.name, unallocatedCaseEntity.crn, unallocatedCaseEntity.teamCode)
+    coEvery { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any(), any()) } just runs
+    cut.saveNewEvents(activeEvents, storedUnallocatedEventsForSave, unallocatedCaseEntity.name, unallocatedCaseEntity.crn, unallocatedCaseEntity.tier, unallocatedCaseEntity.provisionalTier)
     verify(exactly = 1) { telemetryService.trackAllocationDemandRaised(any(), any(), any()) }
   }
 
   @Test
   fun `wont save if the event isnt eligible`() = runTest {
     val unallocatedCaseEntity = storedUnallocatedEvents.get(1)
-    coEvery { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any()) } just runs
-    cut.saveNewEvents(activeEvents, storedUnallocatedEvents, unallocatedCaseEntity.name, unallocatedCaseEntity.crn, unallocatedCaseEntity.teamCode)
+    coEvery { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any(), any()) } just runs
+    cut.saveNewEvents(activeEvents, storedUnallocatedEvents, unallocatedCaseEntity.name, unallocatedCaseEntity.crn, unallocatedCaseEntity.tier, unallocatedCaseEntity.provisionalTier)
     verify(exactly = 0) { telemetryService.trackAllocationDemandRaised(any(), any(), any()) }
   }
 
   @Test
   fun `update event if tier is different`() {
-    val unallocatedCaseEntity = storedUnallocatedEventsForUpdate.get(1)
-    coEvery { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any()) } just runs
-    cut.updateExistingEvents(activeEvents, storedUnallocatedEventsForUpdate, unallocatedCaseEntity.name, unallocatedCaseEntity.tier)
-    verify(exactly = 1) { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any()) }
+    val unallocatedCaseEntity = storedUnallocatedEventsForTierUpdate.get(1)
+    coEvery { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any(), any()) } just runs
+    cut.updateExistingEvents(activeEvents, storedUnallocatedEventsForTierUpdate, unallocatedCaseEntity.name, unallocatedCaseEntity.tier, unallocatedCaseEntity.provisionalTier)
+    verify(exactly = 1) { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any(), any()) }
+  }
+
+  @Test
+  fun `update event if tier provisional status is different`() {
+    val unallocatedCaseEntity = storedUnallocatedEventsForProvisionalUpdate.get(1)
+    coEvery { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any(), any()) } just runs
+    cut.updateExistingEvents(activeEvents, storedUnallocatedEventsForTierUpdate, unallocatedCaseEntity.name, unallocatedCaseEntity.tier, unallocatedCaseEntity.provisionalTier)
+    verify(exactly = 1) { repository.upsertUnallocatedCase(any(), any(), any(), any(), any(), any(), any()) }
   }
 
   @Test

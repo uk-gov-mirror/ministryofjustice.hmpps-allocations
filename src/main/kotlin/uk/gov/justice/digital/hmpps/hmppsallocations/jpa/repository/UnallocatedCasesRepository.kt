@@ -23,9 +23,9 @@ interface UnallocatedCasesRepository : CrudRepository<UnallocatedCaseEntity, Lon
   @Suppress("LongParameterList")
   @Modifying
   @Query(
-    value = """INSERT INTO unallocated_cases ("name", crn, tier, team_code, provider_code, conviction_number) VALUES (:name, :crn, :tier, :teamCode, :providerCode, :convictionNumber)
-      ON CONFLICT (conviction_number, crn) DO UPDATE SET "name" = excluded.name, tier = excluded.tier, team_code = excluded.team_code, provider_code = excluded.provider_code;""",
+    value = """INSERT INTO unallocated_cases ("name", crn, tier, provisional_tier, team_code, provider_code, conviction_number) VALUES (:name, :crn, :tier, :provisionalTier, :teamCode, :providerCode, :convictionNumber)
+      ON CONFLICT (conviction_number, crn) DO UPDATE SET "name" = excluded.name, tier = excluded.tier, provisional_tier = excluded.provisional_tier, team_code = excluded.team_code, provider_code = excluded.provider_code;""",
     nativeQuery = true,
   )
-  fun upsertUnallocatedCase(name: String, crn: String, tier: String, teamCode: String, providerCode: String, convictionNumber: Int)
+  fun upsertUnallocatedCase(name: String, crn: String, tier: String, provisionalTier: Boolean, teamCode: String, providerCode: String, convictionNumber: Int)
 }

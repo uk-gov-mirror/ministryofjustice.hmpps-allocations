@@ -7,8 +7,9 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.DeliusCaseAccess
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.HmppsTierApiClient
-import uk.gov.justice.digital.hmpps.hmppsallocations.client.MissingTierException
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.TierNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsallocations.client.WorkforceAllocationsToDeliusApiClient
+import uk.gov.justice.digital.hmpps.hmppsallocations.client.dto.TierWithStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.domain.LaoStatus
 import uk.gov.justice.digital.hmpps.hmppsallocations.jpa.repository.UnallocatedCasesRepository
 
@@ -47,9 +48,9 @@ class UpsertUnallocatedCaseService(
           val tier = getTier(crn)
           log.debug("hmpps tier api client: got tier for crn: $crn")
           val name = unallocatedEvents.name.getCombinedName()
-          databaseService.saveNewEvents(activeEvents, storedUnallocatedEvents, name, crn, tier)
-          databaseService.updateExistingEvents(activeEvents, storedUnallocatedEvents, name, tier)
-        } catch (e: MissingTierException) {
+          databaseService.saveNewEvents(activeEvents, storedUnallocatedEvents, name, crn, tier.tierScore, tier.provisional)
+          databaseService.updateExistingEvents(activeEvents, storedUnallocatedEvents, name, tier.tierScore, tier.provisional)
+        } catch (e: TierNotFoundException) {
           log.error("Tier Missing for crn $crn; ${e.message}")
         } finally {
           databaseService.deleteOldEvents(storedUnallocatedEvents, activeEvents)
@@ -78,5 +79,5 @@ class UpsertUnallocatedCaseService(
     MDC.remove(LAO_STATUS)
   }
 
-  suspend fun getTier(crn: String): String = hmppsTierApiClient.getTierByCrn(crn = crn) ?: throw MissingTierException("Missing tier: $crn")
+  suspend fun getTier(crn: String): TierWithStatus = hmppsTierApiClient.getTierByCrn(crn = crn) ?: throw TierNotFoundException("Tier not found: $crn")
 }
