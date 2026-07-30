@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.awaitBodyOrNull
@@ -149,7 +150,7 @@ class WorkforceAllocationsToDeliusApiClient(private val webClient: WebClient) {
             username?.also { ub.queryParam("username", it) }
             ub.build()
           }
-          .bodyValue(crns)
+          .body(BodyInserters.fromValue(crns))
           .awaitExchange { response ->
             when (response.statusCode()) {
               HttpStatus.OK -> response.awaitBody()

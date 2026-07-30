@@ -1,13 +1,22 @@
 package uk.gov.justice.digital.hmpps.hmppsallocations.client
 
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.http.codec.HttpMessageWriter
+import org.springframework.http.server.reactive.ServerHttpRequest
+import org.springframework.mock.http.client.reactive.MockClientHttpRequest
+import org.springframework.web.reactive.function.BodyInserter
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.ExchangeFunction
+import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
+import java.net.URI
+import java.util.Optional
 
 class WorkforceAllocationsToDeliusApiClientTest {
   @Test
@@ -139,6 +148,34 @@ class WorkforceAllocationsToDeliusApiClientTest {
       WorkforceAllocationsToDeliusApiClient(webClient).getUnallocatedEvents("999999")
     }
     assert(exception.message!!.contains("Retries exhausted: 3/3"))
+  }
+
+  @Test
+  fun `getUserAccess with empty crn list posts empty json array as body`() = runBlocking {
+    var capturedBody = ""
+    val strategies = ExchangeStrategies.withDefaults()
+    val bodyInserterContext = object : BodyInserter.Context {
+      override fun messageWriters(): List<HttpMessageWriter<*>> = strategies.messageWriters()
+      override fun serverRequest(): Optional<ServerHttpRequest> = Optional.empty()
+      override fun hints(): Map<String, Any> = emptyMap()
+    }
+
+    val exchangeFunction = ExchangeFunction { request ->
+      val mockHttpRequest = MockClientHttpRequest(HttpMethod.POST, URI.create("/users/limited-access"))
+      request.body().insert(mockHttpRequest, bodyInserterContext).block()
+      capturedBody = mockHttpRequest.bodyAsString.block() ?: ""
+
+      Mono.just(
+        ClientResponse.create(HttpStatus.OK)
+          .header("Content-Type", "application/json")
+          .body("""{"access":[]}""")
+          .build(),
+      )
+    }
+    val webClient = WebClient.builder().exchangeFunction(exchangeFunction).build()
+    WorkforceAllocationsToDeliusApiClient(webClient).getUserAccess(emptyList())
+
+    assertEquals("[]", capturedBody)
   }
 
   @Test
