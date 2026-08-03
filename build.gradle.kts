@@ -7,7 +7,7 @@ plugins {
   kotlin("jvm") version "2.3.10"
   id("io.gitlab.arturbosch.detekt") version "1.23.8"
   id("org.jetbrains.kotlin.plugin.allopen") version "2.3.10"
-  id("org.owasp.dependencycheck") version "12.2.0"
+  id("org.owasp.dependencycheck") version "13.0.0"
 }
 
 configurations {
