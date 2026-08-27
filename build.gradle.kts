@@ -37,7 +37,7 @@ dependencies {
 
   implementation("org.springframework.boot:spring-boot-starter-webflux:3.5.10")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.5.10")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.6.3")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.4.1")
 
   implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.15")
 
