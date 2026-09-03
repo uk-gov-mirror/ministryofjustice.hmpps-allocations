@@ -1,13 +1,13 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.3.0"
-  kotlin("plugin.spring") version "2.3.10"
-  kotlin("plugin.jpa") version "2.3.10"
-  kotlin("jvm") version "2.3.10"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.7.1"
+  kotlin("plugin.spring") version "2.4.10"
+  kotlin("plugin.jpa") version "2.4.10"
+  kotlin("jvm") version "2.4.10"
   id("io.gitlab.arturbosch.detekt") version "1.23.8"
-  id("org.jetbrains.kotlin.plugin.allopen") version "2.3.10"
-  id("org.owasp.dependencycheck") version "12.2.0"
+  id("org.jetbrains.kotlin.plugin.allopen") version "2.4.10"
+  id("org.owasp.dependencycheck") version "12.2.2"
 }
 
 configurations {
@@ -35,33 +35,33 @@ dependencies {
   implementation(kotlin("stdlib"))
   implementation("com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1")
 
-  implementation("org.springframework.boot:spring-boot-starter-webflux:3.5.10")
-  implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.5.10")
+  implementation("org.springframework.boot:spring-boot-starter-webflux:3.5.16")
+  implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.5.16")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.6.3")
 
-  implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.15")
+  implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.9.0")
 
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.10.2")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.10.2")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.11.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.11.0")
 
   runtimeOnly("com.zaxxer:HikariCP")
   runtimeOnly("org.flywaydb:flyway-core")
   implementation("org.flywaydb:flyway-database-postgresql")
-  runtimeOnly("org.postgresql:postgresql:42.7.10")
+  runtimeOnly("org.postgresql:postgresql:42.7.13")
 
   testImplementation("io.jsonwebtoken:jjwt-impl:0.13.0")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.mock-server:mockserver-netty:5.15.0")
   testImplementation("org.junit.jupiter:junit-jupiter-params")
-  testImplementation("io.mockk:mockk:1.14.9")
+  testImplementation("io.mockk:mockk:1.14.11")
   testImplementation("com.ninja-squad:springmockk:5.0.1")
-  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
 }
 
 tasks {
